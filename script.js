@@ -2,10 +2,11 @@ const apiURL = 'https://jsonplaceholder.typicode.com/todos';
 const todosUL = document.querySelector('.todos');
 const form = document.querySelector('#form');
 
-const getTodoDo = () => {
-  fetch(apiURL + '?_limit=10')
-    .then((res) => res.json())
-    .then((todo) => todo.forEach((todo) => addToDom(todo)));
+const getTodoDo = async () => {
+  const response = await fetch(apiURL + '?_limit=10');
+  const todo = await response.json();
+
+  todo.forEach((todo) => addToDom(todo));
 };
 
 const addToDom = (item) => {
@@ -22,28 +23,20 @@ const addToDom = (item) => {
   todosUL.appendChild(li);
 };
 
-const createTodo = (e) => {
+const createTodo = async (e) => {
   e.preventDefault();
 
   const input = e.target.firstElementChild.value;
   const obj = { title: input, completed: false };
-  //   addToDom(obj);
 
-  fetch(apiURL, {
-    // method
+  const response = await fetch(apiURL, {
     method: 'POST',
-
-    // body
     body: JSON.stringify(obj),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data = await response.json();
 
-    // headers
-
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then((data) => addToDom(data));
+  addToDom(data);
 };
 
 const changeState = (id, completed) => {
@@ -73,19 +66,17 @@ todosUL.addEventListener('click', (e) => {
   }
 });
 
-todosUL.addEventListener('dblclick', (e) => {
+todosUL.addEventListener('dblclick', async (e) => {
   const id = e.target.dataset.id;
 
-  fetch(`${apiURL}/${id}`, {
+  const response = fetch(`${apiURL}/${id}`, {
     method: 'DELETE',
     headers: {
       'content-type': 'application/json',
     },
-  })
-    .then((res) => res.json())
-    .then(() => {
-      if (e.target.tagName === 'LI') {
-        e.target.remove();
-      }
-    });
+  });
+
+  if (e.target.tagName === 'LI') {
+    e.target.remove();
+  }
 });
